@@ -82,6 +82,7 @@ export function createBeforeEachCycle(
         )
 
         if (options.sequence === "stack") {
+          befores.reverse()
           afters.reverse()
         }
 

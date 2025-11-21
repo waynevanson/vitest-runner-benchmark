@@ -35,6 +35,7 @@ export function createBeforeEachCycle(test, options) {
             const befores = unknowns.filter((value) => typeof value === "function");
             const afters = suiteListeners.afters.map((fn) => () => fn(test.context, suite));
             if (options.sequence === "stack") {
+                befores.reverse();
                 afters.reverse();
             }
             return async function cleanupEachSuite() {

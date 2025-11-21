@@ -5,38 +5,72 @@ import {
   beforeAll,
   describe,
   expect,
-  test
+  test,
+  vi
 } from "vitest"
 
-describe("sequencing", () => {
-  let number = 0
+function tick() {
+  return new Promise<void>((resolve) => setTimeout(resolve, 0))
+}
 
-  const after = (name: "all" | "each", scoped: boolean) => () => {
-    number--
-    // console.log(number, "after", name, scoped)
-  }
+describe("hook sequencing", () => {
+  describe("scoped", () => {
+    const afterEachOnly = vi.fn()
+    const afterEachBoth = vi.fn()
 
-  const before = (name: "all" | "each", scoped: boolean) => () => {
-    number++
-    // console.log(number, "before", name, scoped)
-  }
+    const beforeEachOnly = vi.fn()
+    const beforeEachBoth = vi.fn(() => afterEachBoth)
 
-  const both = (name: "all" | "each") => () => {
-    before(name, true)()
-    return after(name, true)
-  }
+    beforeEach(beforeEachOnly)
+    beforeEach(beforeEachBoth)
+    afterEach(afterEachOnly)
 
-  beforeEach(both("each"))
-  beforeAll(both("all"))
+    let ran = false
+    test("calls hooks", () => {
+      expect(beforeEachOnly).toHaveBeenCalled()
+      expect(beforeEachBoth).toHaveBeenCalled()
 
-  beforeAll(before("all", false))
-  afterAll(after("all", false))
+      if (!ran) {
+        expect(beforeEachOnly).toBeCalledTimes(1)
+        expect(beforeEachBoth).toBeCalledTimes(1)
+        expect(afterEachOnly).not.toHaveBeenCalled()
+        expect(afterEachBoth).not.toHaveBeenCalled()
+        ran = true
+      } else {
+        expect(beforeEachOnly).toHaveBeenCalled()
+        expect(beforeEachBoth).toHaveBeenCalled()
+        expect(afterEachOnly).toHaveBeenCalled()
+        expect(afterEachBoth).toHaveBeenCalled()
+      }
+    })
+  })
 
-  beforeEach(before("each", false))
-  afterEach(after("each", false))
+  describe.only("from setup file", () => {
+    const {
+      afterEachBoth,
+      afterEachOnly,
+      beforeEachBoth,
+      beforeEachOnly
+      //@ts-ignore
+    } = global["SETUP_FILE_GLOBAL_HOOKS"]
 
-  test("calls hooks", () => {
-    // console.log("test", number)
-    expect(number).toBe(4)
+    let ran = false
+    test("calls hooks", () => {
+      expect(beforeEachOnly).toHaveBeenCalled()
+      expect(beforeEachBoth).toHaveBeenCalled()
+
+      if (!ran) {
+        expect(beforeEachOnly).toBeCalledTimes(1)
+        expect(beforeEachBoth).toBeCalledTimes(1)
+        expect(afterEachOnly).not.toHaveBeenCalled()
+        expect(afterEachBoth).not.toHaveBeenCalled()
+        ran = true
+      } else {
+        expect(beforeEachOnly).toHaveBeenCalled()
+        expect(beforeEachBoth).toHaveBeenCalled()
+        expect(afterEachOnly).toHaveBeenCalled()
+        expect(afterEachBoth).toHaveBeenCalled()
+      }
+    })
   })
 })
