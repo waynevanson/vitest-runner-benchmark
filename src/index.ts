@@ -1,25 +1,10 @@
-import type { SequenceHooks, Suite, SuiteHooks, Test } from "@vitest/runner"
+import type { Suite, SuiteHooks, Test, TestContext } from "@vitest/runner"
 import type { SerializedConfig } from "vitest"
 import { VitestTestRunner } from "vitest/runners"
 import type { VitestRunner } from "vitest/suite"
 import { getFn, getHooks, setHooks } from "vitest/suite"
 import { createBeforeEachCycle } from "./hooks.js"
 import { increments } from "./iterator.js"
-
-/**
- * @summary
- * Call once per cycle
- * @todo How to Vite's hooks order initially? When should our cleanups should be called?
- */
-export function getBeforeEachCycle(test: Test, sequenceHooks: SequenceHooks) {
-  const suite = test.suite
-
-  if (!suite) {
-    throw new Error("Expected test to have a suite")
-  }
-
-  return async function beforeEachCycle() {}
-}
 
 /**
  * @summary
@@ -55,9 +40,6 @@ export default class VitestBenchRunner
     super(config)
   }
 
-  // we need to keep the listeners bound to suites at top level
-  // becuase we need to order the hooks as we (call them)? in `onBeforeEachSuite`
-
   // Move `{before,after}Each` hooks into runner so Vitest can't run them automatically.
   // This may cause some issues for some Vitest internals but we we can get to that later.
   async onBeforeRunSuite(suite: Suite): Promise<void> {
@@ -87,10 +69,6 @@ export default class VitestBenchRunner
     return hooks
   }
 
-  // todo: assumes we're going to run at least 1 bench via config
-  //
-  // todo: how about just call after Each first then beforeEach at the end?
-  // lets hook into taking away control of execution from vite
   async runTask(test: Test) {
     const fn = getFn(test)
 
@@ -112,9 +90,6 @@ export default class VitestBenchRunner
       performance.mark(`${test.id}:shut:${count}`)
       await afterEachCycle()
     }
-
-    // test.result!.state === "pass"
-    console.log("end")
 
     this.#tests.add(test)
   }
