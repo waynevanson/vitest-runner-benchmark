@@ -2,13 +2,12 @@
 // It does not handle execution.
 
 import {
-  Test,
-  BeforeEachListener,
   AfterEachListener,
+  BeforeEachListener,
+  SequenceHooks,
   Suite,
   SuiteHooks,
-  SequenceHooks,
-  TestContext
+  Test
 } from "@vitest/runner"
 
 export interface BeforeEachCycleOptions {
@@ -35,8 +34,8 @@ function deriveSuiteListeners(
   while (parent) {
     const hooks = getHooks(parent)
     const item = {
-      befores: hooks.beforeEach.toReversed(),
-      afters: hooks.afterEach.toReversed()
+      befores: hooks.beforeEach,
+      afters: hooks.afterEach
     }
 
     listeners.unshift(item)
