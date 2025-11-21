@@ -1,0 +1,8 @@
+{
+  "exports": {
+    ".": {
+      "types": "./../dist/reporter.d.ts",
+      "default": "./../dist/reporter.js"
+    }
+  }
+}

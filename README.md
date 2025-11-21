@@ -51,10 +51,10 @@ process.env["VITEST_RUNNER_BENCHMARK_OPTIONS"] = JSON.stringify({
 export default defineConfig({
     test: {
         // required. You'll likely want to control this with an environment variable
-        runner: "vitest-runner-benchmark/runner"
+        runner: "./node_modules/vitest-runner-benchmark/runner"
 
         // optionally, add the extra reporter
-        reporters: ["default", "vitest-runner-benchmark/reporter"]
+        reporters: ["default", "./node_modules/vitest-runner-benchmark/reporter"]
 
         // optionally, log the reporters' BMF output to a file.
         outDir: ".benchmarks.json"
