@@ -4,17 +4,18 @@ A Vitest runner and reporter that runs benchmarks on existing tests.
 
 This is not endorsed by Vitest, please use at your own risk.
 
+Development is being tested against [AriaKit](https://github.com/ariakit/ariakit) project in this [pull request](https://github.com/ariakit/ariakit/pull/4415).
+
 ## Cost Benefit Analysis
 
 ### Benefits
 
 1. Uses existing tests.
-2. Removes throws from expect (when using instance bound `expect`).
 
 ### Drawbacks
 
-1. Expressions used in assertions are still evaluated.
-2. Not endorsed by Vitest team.
+1. Keeps assertions in place.
+2. Likely not endorsed by Vitest team.
 
 ## Usage
 
