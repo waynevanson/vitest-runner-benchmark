@@ -22,7 +22,7 @@ This is not endorsed by Vitest, please use at your own risk.
 
 ```sh
 # Use relevant commands to your package manager.
-npm install vitest-runner-benchmark
+npm install vitest-runner-benchmark@git://github.com:waynevanson/vitest-runner-benchmark.git
 ```
 
 2. Configure runner for use in Vitest.
