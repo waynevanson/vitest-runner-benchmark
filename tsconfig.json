@@ -3,7 +3,8 @@
     "strict": true,
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "target": "esnext"
+    "target": "esnext",
+    "skipLibCheck": true
   },
   "exclude": ["dist"]
 }

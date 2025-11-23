@@ -12,6 +12,7 @@ process.env["VITEST_RUNNER_BENCHMARK_OPTIONS"] = JSON.stringify({
 export default defineConfig({
   test: {
     runner: "./dist/runner.js",
-    setupFiles: ["./vitest.setup.ts"]
+    setupFiles: ["./vitest.setup.ts"],
+    reporters: ["default", "./dist/bmf-reporter.js"]
   }
 })
