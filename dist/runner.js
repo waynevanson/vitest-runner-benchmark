@@ -1,7 +1,7 @@
 import { VitestTestRunner } from "vitest/runners";
 import { getFn, getHooks, setHooks } from "vitest/suite";
-import { createBeforeEachCycle } from "./hooks.js";
 import { calculate } from "./calculate.js";
+import { createBeforeEachCycle } from "./hooks.js";
 /**
  * @summary
  * A `VitestRunner` that runs tests as benchmarks.
