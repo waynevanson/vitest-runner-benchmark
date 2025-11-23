@@ -66,7 +66,7 @@ export class VitestBenchRunner extends VitestTestRunner {
             const end = performance.now();
             const delta = end - start;
             samples.push(delta);
-            // reset `expect.assertions(n)` because it sums over each test call.
+            // reset `expect.assertions(n)` to `0` because it sums over each test call.
             test.context.expect.setState({ assertionCalls: 0 });
             // todo: log a cycle event
             await afterEachCycle();

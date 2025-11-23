@@ -84,6 +84,7 @@ export class VitestBenchRunner
     const samples = []
     for (let count = 1; count <= this.#config.benchmark.cycles; count++) {
       const afterEachCycle = await beforeEachCycle()
+
       const start = performance.now()
 
       // todo: log a cycle event
@@ -91,10 +92,9 @@ export class VitestBenchRunner
 
       const end = performance.now()
       const delta = end - start
-
       samples.push(delta)
 
-      // reset `expect.assertions(n)` because it sums over each test call.
+      // reset `expect.assertions(n)` to `0` because it sums over each test call.
       test.context.expect.setState({ assertionCalls: 0 })
 
       // todo: log a cycle event

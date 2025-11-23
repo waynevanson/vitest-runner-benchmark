@@ -2,10 +2,10 @@ import { defineConfig } from "vitest/config"
 
 process.env["VITEST_RUNNER_BENCHMARK_OPTIONS"] = JSON.stringify({
   benchmark: {
-    cycles: 64
+    cycles: 100_00
   },
   warmup: {
-    cycles: 10
+    cycles: 1000
   }
 })
 

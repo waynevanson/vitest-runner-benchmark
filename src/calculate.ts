@@ -1,6 +1,6 @@
 type Calculation = {
-  minimum_value: number
-  maximum_value: number
+  minimum_value?: number
+  maximum_value?: number
   value: number
 }
 
@@ -13,39 +13,21 @@ export function calculate(
   samples: Array<number>,
   cycles: number
 ): Calculations {
-  const time = sum(samples)
+  const time = samples.reduce((accu, curr) => accu + curr, 0)
 
-  const latency: Calculation = {
+  const latency = {
     minimum_value: Math.min(...samples),
     maximum_value: Math.max(...samples),
     value: time / samples.length
-  }
+  } satisfies Calculation
 
-  // todo: not sure if this is correct
-  const throughput: Calculation = {
+  const throughput = {
     value: cycles / time,
-    minimum_value: sum(repeat(latency.minimum_value, samples.length)) / time,
-    maximum_value: sum(repeat(latency.maximum_value, samples.length)) / time
-  }
+    minimum_value: cycles / (latency.maximum_value * samples.length),
+    maximum_value: cycles / (latency.minimum_value * samples.length)
+  } satisfies Calculation
 
-  return {
-    latency,
-    throughput
-  }
-}
+  // todo: percentiles of these two measures.
 
-function sum(iterable: Iterable<number>): number {
-  let number = 0
-
-  for (const item of iterable) {
-    number += item
-  }
-
-  return number
-}
-
-function* repeat<T>(item: T, count: number) {
-  for (let counter = 1; counter <= count; counter++) {
-    yield item
-  }
+  return { latency, throughput }
 }

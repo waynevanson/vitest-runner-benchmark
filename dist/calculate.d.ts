@@ -1,6 +1,6 @@
 type Calculation = {
-    minimum_value: number;
-    maximum_value: number;
+    minimum_value?: number;
+    maximum_value?: number;
     value: number;
 };
 export interface Calculations {

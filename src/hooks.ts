@@ -10,14 +10,6 @@ import {
   Test
 } from "@vitest/runner"
 
-export interface BeforeEachCycleOptions {
-  sequence: SequenceHooks
-  /**
-   * @param suite
-   * @throws
-   */
-  getHooks(suite: Suite): Pick<SuiteHooks, "afterEach" | "beforeEach">
-}
 /**
  * @summary
  * Gets all the hooks to run the suite for a test.
@@ -53,6 +45,15 @@ function deriveTestListeners(
   collect(test.file)
 
   return listeners
+}
+
+export interface BeforeEachCycleOptions {
+  sequence: SequenceHooks
+  /**
+   * @param suite
+   * @throws
+   */
+  getHooks(suite: Suite): Pick<SuiteHooks, "afterEach" | "beforeEach">
 }
 
 export function createBeforeEachCycle(
