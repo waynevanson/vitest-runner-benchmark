@@ -39,4 +39,4 @@ jobs:
           --err \
           --adapter json \
           --github-actions '${{ secrets.GITHUB_TOKEN }}' \
-          bencher "pnpm run --silent benchmark"
+          'pnpm run --silent benchmark'
