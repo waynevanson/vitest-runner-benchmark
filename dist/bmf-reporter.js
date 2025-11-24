@@ -1,5 +1,5 @@
 // where to save this shit to?
-export default class BMFReporter {
+export class BMFReporter {
     async onTestRunEnd(testModules, unhandledErrors, reason) {
         if (reason !== "passed" || unhandledErrors.length > 0)
             return;
@@ -19,3 +19,4 @@ export default class BMFReporter {
         console.log(JSON.stringify(bmf));
     }
 }
+export default BMFReporter;

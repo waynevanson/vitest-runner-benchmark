@@ -7,7 +7,7 @@ import {
 import { Calculations } from "./calculate.js"
 
 // where to save this shit to?
-export default class BMFReporter implements Reporter {
+export class BMFReporter implements Reporter {
   async onTestRunEnd(
     testModules: ReadonlyArray<TestModule>,
     unhandledErrors: ReadonlyArray<SerializedError>,
@@ -36,3 +36,5 @@ export default class BMFReporter implements Reporter {
     console.log(JSON.stringify(bmf))
   }
 }
+
+export default BMFReporter

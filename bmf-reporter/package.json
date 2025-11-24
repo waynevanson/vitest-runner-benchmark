@@ -1,0 +1,8 @@
+{
+  "exports": {
+    ".": {
+      "types": "./../dist/bmf-reporter.d.ts",
+      "default": "./../dist/bmf-reporter.js"
+    }
+  }
+}
