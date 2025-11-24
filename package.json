@@ -25,9 +25,9 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./reporter": {
-      "types": "./dist/reporter.d.ts",
-      "default": "./dist/reporter.js"
+    "./bmf-reporter": {
+      "types": "./dist/bmf-reporter.d.ts",
+      "default": "./dist/bmf-reporter.js"
     }
   },
   "scripts": {
