@@ -31,3 +31,24 @@ export function calculate(
 
   return { latency, throughput }
 }
+
+function calculatePercentilesLatency() {}
+
+function calculatePercentileSum(
+  samples: Array<number>,
+  percentile: number
+): number {
+  // percentile => (0, length] -> (0, 100]
+  function scale(value: number) {
+    return (value * samples.length) / 100
+  }
+
+  const float = scale(percentile)
+  const wholeIndex = Math.ceil(float)
+
+  const aa = samples.slice(wholeIndex)
+  const whole = aa.reduce((accu, curr) => accu + curr, 0)
+  // todo: get the remainding floating bit at the bottom
+
+  return whole / aa.length
+}

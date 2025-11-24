@@ -8,6 +8,7 @@ import { createBeforeEachCycle } from "./hooks.js";
  */
 // todo: remove assertions via vite plugin?
 export class VitestBenchRunner extends VitestTestRunner {
+    //
     // todo: ensure this can take multiple things like minimum time of cycles.
     #config;
     // Allowing Vitest to run the `each` hooks means we don't have access to the
@@ -24,11 +25,15 @@ export class VitestBenchRunner extends VitestTestRunner {
         }
         super(config);
         const options = JSON.parse(process.env["VITEST_RUNNER_BENCHMARK_OPTIONS"] ?? "{}");
-        const bcycles = options?.benchmark?.cycles ?? 64;
-        const wcycles = options?.warmup?.cycles ?? 10;
         this.#config = {
-            benchmark: { cycles: bcycles },
-            warmup: { cycles: wcycles }
+            benchmark: {
+                minCycles: options?.benchmark?.minCycles ?? 64,
+                minMs: options?.benchmark?.minMs ?? 5_000
+            },
+            warmup: {
+                minCycles: options?.warmup?.minCycles ?? 10,
+                minMs: options?.warmup?.minMs ?? 500
+            }
         };
     }
     // Move `{before,after}Each` hooks into runner so Vitest can't run them automatically.
@@ -52,29 +57,39 @@ export class VitestBenchRunner extends VitestTestRunner {
             sequence: this.config.sequence.hooks,
             getHooks: this.getHooks.bind(this)
         });
-        for (let count = 1; count <= this.#config.warmup.cycles; count++) {
-            const afterEachCycle = await beforeEachCycle();
-            await fn();
-            await afterEachCycle();
-        }
-        const samples = [];
-        for (let count = 1; count <= this.#config.benchmark.cycles; count++) {
-            const afterEachCycle = await beforeEachCycle();
+        async function cycle() {
             const start = performance.now();
-            // todo: log a cycle event
+            const afterEachCycle = await beforeEachCycle();
             await fn();
-            const end = performance.now();
-            const delta = end - start;
-            samples.push(delta);
             // reset `expect.assertions(n)` to `0` because it sums over each test call.
             test.context.expect.setState({ assertionCalls: 0 });
-            // todo: log a cycle event
             await afterEachCycle();
+            const end = performance.now();
+            const delta = end - start;
+            return delta;
         }
-        const calculations = calculate(samples, this.#config.benchmark.cycles);
+        let cycles, duration;
+        // warmup
+        cycles = 0;
+        duration = 0;
+        while (cycles < this.#config.warmup.minCycles &&
+            duration < this.#config.warmup.minMs) {
+            duration += await cycle();
+        }
+        // benchmark
+        cycles = 0;
+        duration = 0;
+        const samples = [];
+        while (cycles < this.#config.benchmark.minCycles &&
+            duration < this.#config.benchmark.minMs) {
+            const sample = await cycle();
+            duration += sample;
+            samples.push(sample);
+        }
+        const calculations = calculate(samples, cycles);
         // A place where reporters can read stuff
         test.meta.bench = {
-            expected: this.#config.benchmark.cycles,
+            expected: cycles,
             calculations
         };
     }

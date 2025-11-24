@@ -13,3 +13,16 @@ export function calculate(samples, cycles) {
     // todo: percentiles of these two measures.
     return { latency, throughput };
 }
+function calculatePercentilesLatency() { }
+function calculatePercentileSum(samples, percentile) {
+    // percentile => (0, length] -> (0, 100]
+    function scale(value) {
+        return (value * samples.length) / 100;
+    }
+    const float = scale(percentile);
+    const wholeIndex = Math.ceil(float);
+    const aa = samples.slice(wholeIndex);
+    const whole = aa.reduce((accu, curr) => accu + curr, 0);
+    // todo: get the remainding floating bit at the bottom
+    return whole / aa.length;
+}
