@@ -16,8 +16,8 @@ export function calculate(
   const time = samples.reduce((accu, curr) => accu + curr, 0)
 
   const latency = {
-    minimum_value: Math.min(...samples),
-    maximum_value: Math.max(...samples),
+    minimum_value: samples.reduce((accu, curr) => Math.min(accu, curr)),
+    maximum_value: samples.reduce((accu, curr) => Math.max(accu, curr)),
     value: time / samples.length
   } satisfies Calculation
 
