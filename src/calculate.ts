@@ -4,51 +4,69 @@ export interface Calculation {
   value: number
 }
 
-export interface Calculations {
-  latency: Calculation
-  throughput: Calculation
-}
+export interface Calculations extends Record<string, Calculation> {}
 
 export function calculate(
   samples: Array<number>,
   cycles: number
 ): Calculations {
+  samples.sort()
+
   const time = samples.reduce((accu, curr) => accu + curr, 0)
 
   const latency = {
     minimum_value: samples.reduce((accu, curr) => Math.min(accu, curr)),
     maximum_value: samples.reduce((accu, curr) => Math.max(accu, curr)),
     value: time / samples.length
-  } satisfies Calculation
+  }
 
   const throughput = {
     value: cycles / time,
     minimum_value: cycles / (latency.maximum_value * samples.length),
     maximum_value: cycles / (latency.minimum_value * samples.length)
-  } satisfies Calculation
+  }
 
   // todo: percentiles of these two measures.
+  const percentiles = calculatePercentiles(
+    samples,
+    [50, 70, 80, 90, 95, 98, 99]
+  )
 
-  return { latency, throughput }
+  return { latency, throughput, ...percentiles }
 }
 
-function calculatePercentilesLatency() {}
+function calculatePercentiles(
+  samples: Array<number>,
+  percentiles: Array<number>
+) {
+  const measures = {} as Calculations
 
-function calculatePercentileSum(
+  for (const percentile of percentiles) {
+    const name = `P${percentile}`
+    measures[name] = {
+      value: calculatePercentile(samples, percentile)
+    }
+  }
+
+  return measures
+}
+
+// Thanks GPT
+function calculatePercentile(
   samples: Array<number>,
   percentile: number
 ): number {
-  // percentile => (0, length] -> (0, 100]
-  function scale(value: number) {
-    return (value * samples.length) / 100
+  samples.sort()
+
+  const m = samples.length - 1
+
+  const r = (percentile / 100) * m
+  const i = Math.floor(r)
+  const f = r - i
+
+  if (i === m) {
+    return samples[i]
+  } else {
+    return samples[i] * (1 - f) + samples[i + 1] * f
   }
-
-  const float = scale(percentile)
-  const wholeIndex = Math.ceil(float)
-
-  const aa = samples.slice(wholeIndex)
-  const whole = aa.reduce((accu, curr) => accu + curr, 0)
-  // todo: get the remainding floating bit at the bottom
-
-  return whole / aa.length
 }
