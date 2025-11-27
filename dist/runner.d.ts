@@ -14,7 +14,7 @@ export interface VitestBenchRunnerUserConfig {
          */
         minMs?: number;
     };
-    warmup: {
+    warmup?: {
         /**
          * @default 1
          */

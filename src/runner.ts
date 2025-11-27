@@ -18,7 +18,7 @@ export interface VitestBenchRunnerUserConfig {
      */
     minMs?: number
   }
-  warmup: {
+  warmup?: {
     /**
      * @default 1
      */
@@ -134,7 +134,7 @@ export class VitestBenchRunner
       return delta
     }
 
-    let cycles, duration
+    let cycles: number, duration: number
 
     // warmup
     cycles = 0
