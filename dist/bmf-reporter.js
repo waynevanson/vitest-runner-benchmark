@@ -6,7 +6,7 @@ export class BMFReporter {
         this.config.outputFile =
             typeof vitest.config.outputFile === "string"
                 ? vitest.config.outputFile
-                : vitest.config.outputFile.bmf;
+                : vitest.config.outputFile?.bmf ?? undefined;
     }
     onTestRunEnd(testModules, unhandledErrors, reason) {
         if (reason !== "passed" || unhandledErrors.length > 0)

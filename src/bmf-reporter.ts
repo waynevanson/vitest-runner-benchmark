@@ -20,7 +20,7 @@ export class BMFReporter implements Reporter {
     this.config.outputFile =
       typeof vitest.config.outputFile === "string"
         ? vitest.config.outputFile
-        : vitest.config.outputFile.bmf
+        : vitest.config.outputFile?.bmf ?? undefined
   }
 
   onTestRunEnd(
