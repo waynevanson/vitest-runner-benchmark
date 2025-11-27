@@ -1,3 +1,4 @@
+import { inject } from "vitest";
 import { VitestTestRunner } from "vitest/runners";
 import { getFn, getHooks, setHooks } from "vitest/suite";
 import { calculate } from "./calculate.js";
@@ -10,14 +11,12 @@ import { createBeforeEachCycle } from "./hooks.js";
 // todo: allow configuring what measures to create
 // todo: add tracing
 export class VitestBenchRunner extends VitestTestRunner {
-    //
-    // todo: ensure this can take multiple things like minimum time of cycles.
-    #config;
     // Allowing Vitest to run the `each` hooks means we don't have access to the
     // cleanup function from `beforeEach`.
     // Instead we'll move them here before Vitest can read them,
     // and call them per cycle.
     #hooks = new WeakMap();
+    #config;
     constructor(config) {
         if (config.sequence.concurrent) {
             throw new Error("Expected config.sequence.concurrent to be falsey");
@@ -26,15 +25,15 @@ export class VitestBenchRunner extends VitestTestRunner {
             throw new Error("Expected config.sequence.shuffle to be falsey");
         }
         super(config);
-        const options = JSON.parse(process.env["VITEST_RUNNER_BENCHMARK_OPTIONS"] ?? "{}");
+        const options = inject("benchrunner");
         this.#config = {
             benchmark: {
-                minCycles: options?.benchmark?.minCycles ?? 64,
-                minMs: options?.benchmark?.minMs ?? 5_000
+                minCycles: options?.benchmark?.minCycles ?? 1,
+                minMs: options?.benchmark?.minMs ?? 0
             },
             warmup: {
-                minCycles: options?.warmup?.minCycles ?? 10,
-                minMs: options?.warmup?.minMs ?? 500
+                minCycles: options?.warmup?.minCycles ?? 1,
+                minMs: options?.warmup?.minMs ?? 0
             }
         };
     }

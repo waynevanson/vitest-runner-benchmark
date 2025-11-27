@@ -1,10 +1,52 @@
 import { type Suite, type SuiteHooks, type Test } from "@vitest/runner"
-import type { SerializedConfig } from "vitest"
+import { inject, type SerializedConfig } from "vitest"
 import { VitestTestRunner } from "vitest/runners"
 import type { VitestRunner } from "vitest/suite"
 import { getFn, getHooks, setHooks } from "vitest/suite"
 import { calculate, Calculations } from "./calculate.js"
 import { createBeforeEachCycle } from "./hooks.js"
+
+export interface VitestBenchRunnerUserConfig {
+  benchmark?: {
+    /**
+     * @default 1
+     */
+    minCycles?: number
+
+    /**
+     * @default 0
+     */
+    minMs?: number
+  }
+  warmup: {
+    /**
+     * @default 1
+     */
+    minCycles?: number
+
+    /**
+     * @default 0
+     */
+    minMs?: number
+  }
+}
+
+export interface VitestBenchRunnerConfig {
+  benchmark: {
+    minCycles: number
+    minMs: number
+  }
+  warmup: {
+    minCycles: number
+    minMs: number
+  }
+}
+
+declare module "vitest" {
+  export interface ProvidedContext {
+    benchrunner: VitestBenchRunnerUserConfig
+  }
+}
 
 /**
  * @summary
@@ -17,21 +59,13 @@ export class VitestBenchRunner
   extends VitestTestRunner
   implements VitestRunner
 {
-  //
-  // todo: ensure this can take multiple things like minimum time of cycles.
-  #config: Record<
-    "benchmark" | "warmup",
-    {
-      minCycles: number
-      minMs: number
-    }
-  >
-
   // Allowing Vitest to run the `each` hooks means we don't have access to the
   // cleanup function from `beforeEach`.
   // Instead we'll move them here before Vitest can read them,
   // and call them per cycle.
   #hooks = new WeakMap<Suite, Pick<SuiteHooks, "afterEach" | "beforeEach">>()
+
+  #config: VitestBenchRunnerConfig
 
   constructor(config: SerializedConfig) {
     if (config.sequence.concurrent) {
@@ -44,18 +78,16 @@ export class VitestBenchRunner
 
     super(config)
 
-    const options = JSON.parse(
-      process.env["VITEST_RUNNER_BENCHMARK_OPTIONS"] ?? "{}"
-    )
+    const options = inject("benchrunner")
 
     this.#config = {
       benchmark: {
-        minCycles: options?.benchmark?.minCycles ?? 64,
-        minMs: options?.benchmark?.minMs ?? 5_000
+        minCycles: options?.benchmark?.minCycles ?? 1,
+        minMs: options?.benchmark?.minMs ?? 0
       },
       warmup: {
-        minCycles: options?.warmup?.minCycles ?? 10,
-        minMs: options?.warmup?.minMs ?? 500
+        minCycles: options?.warmup?.minCycles ?? 1,
+        minMs: options?.warmup?.minMs ?? 0
       }
     }
   }
