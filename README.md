@@ -1,4 +1,4 @@
-# `vitest-runner-benchmark`
+# `@waynevanson/vitest-benchmark`
 
 A Vitest runner and reporter that runs benchmarks on existing tests.
 
@@ -23,7 +23,7 @@ Development is being tested against [AriaKit](https://github.com/ariakit/ariakit
 
 ```sh
 # Use relevant commands to your package manager.
-npm install vitest-runner-benchmark@git://github.com:waynevanson/vitest-runner-benchmark.git
+npm install @waynevanson/vitest-benchmark
 ```
 
 2. Configure runner for use in Vitest.
@@ -52,10 +52,10 @@ process.env["VITEST_RUNNER_BENCHMARK_OPTIONS"] = JSON.stringify({
 export default defineConfig({
     test: {
         // required. You'll likely want to control this with an environment variable
-        runner: "./node_modules/vitest-runner-benchmark/runner"
+        runner: "./node_modules/@waynevanson/vitest-benchmark/runner"
 
         // optionally, add the extra reporter
-        reporters: ["default", "./node_modules/vitest-runner-benchmark/bmf-reporter"]
+        reporters: ["default", "./node_modules/@waynevanson/vitest-benchmark/bmf-reporter"]
     }
 })
 ```
