@@ -124,12 +124,13 @@ export class VitestBenchRunner
       const afterEachCycle = await beforeEachCycle()
       await fn()
 
-      // reset `expect.assertions(n)` to `0` because it sums over each test call.
-      test.context.expect.setState({ assertionCalls: 0 })
-
       await afterEachCycle()
 
       const end = performance.now()
+
+      // reset `expect.assertions(n)` to `0` because it sums over each test call.
+      test.context.expect.setState({ assertionCalls: 0 })
+
       const delta = end - start
       return delta
     }
