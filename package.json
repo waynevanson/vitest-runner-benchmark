@@ -4,7 +4,7 @@
   "author": {
     "name": "Wayne Van Son"
   },
-  "version": "0.2.4",
+  "version": "0.2.5",
   "files": [
     "dist",
     "runner",
@@ -37,6 +37,10 @@
     "./bmf-reporter": {
       "types": "./dist/bmf-reporter.d.ts",
       "default": "./dist/bmf-reporter.js"
+    },
+    "./runner": {
+      "types": "./dist/runner.d.ts",
+      "default": "./dist/runner.js"
     }
   },
   "scripts": {
