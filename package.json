@@ -1,6 +1,7 @@
 {
-  "name": "vitest-runner-benchmark",
-  "version": "0.2.2",
+  "name": "@waynevanson/vitest-benchmark",
+  "description": "Vitest runners and reporters for benchmarking",
+  "version": "0.2.3",
   "devDependencies": {
     "@types/node": "^22.10.1",
     "@vitest/runner": "^4.0.12",
