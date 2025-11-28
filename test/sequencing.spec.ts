@@ -13,17 +13,13 @@ const fixture = aliases(["sequencing"])
 
 describe(fixture.sequencing, () => {
   test("should run hooks in an order", async () => {
-    // todo: fail test when failing.
-    // print the pretty error only on fail
     const vitest = await startVitest("test", [], {
       watch: false,
       maxWorkers: 1,
       root: path.join(import.meta.dirname, fixture.sequencing),
-      reporters: [["../../silent-reporter", { summary: false }]]
+      reporters: ["../../silent-reporter"]
     })
 
-    await vitest.waitForTestRunEnd()
-
-    expect(vitest).not.toHaveFailedTests()
+    expect(vitest).toHaveFailedTests()
   })
 })
