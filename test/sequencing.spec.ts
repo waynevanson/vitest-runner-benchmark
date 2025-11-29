@@ -22,4 +22,14 @@ describe("sequencing", () => {
     expect(vitest).toHaveNumberOfTests(1)
     expect(vitest).not.toHaveFailedTests()
   })
+
+  test("should allow top level tests", async () => {
+    const vitest = await runVitest(
+      path.join(import.meta.dirname, "sequencing"),
+      "top-level"
+    )
+
+    expect(vitest).toHaveNumberOfTests(1)
+    expect(vitest).not.toHaveFailedTests()
+  })
 })
