@@ -6,16 +6,12 @@
   },
   "version": "0.3.0",
   "files": [
-    "dist",
-    "runner",
-    "bmf-reporter"
+    "dist"
   ],
   "devDependencies": {
     "@types/node": "^22.19.1",
-    "@types/picomatch": "^4.0.2",
     "@vitest/runner": "^4.0.14",
     "glob": "^13.0.0",
-    "picomatch": "^4.0.3",
     "typescript": "^5.9.3",
     "vite-plugin-dts": "^4.5.4",
     "vitest": "^4.0.14"
@@ -49,7 +45,8 @@
   },
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "benchmark": "BENCHMARK=1 vitest run"
   },
   "packageManager": "pnpm@10.22.0"
 }
