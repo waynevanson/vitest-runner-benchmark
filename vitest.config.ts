@@ -3,14 +3,6 @@ import { defineConfig } from "vitest/config"
 const BENCHMARK = process.env.BENCHMARK === "1"
 
 const runner = BENCHMARK ? "@waynevanson/vitest-benchmark/runner" : undefined
-const benchrunner = {
-  warmup: {
-    minMs: 2_000
-  },
-  benchmark: {
-    minMs: 60_000
-  }
-}
 
 export default defineConfig({
   test: {
@@ -19,7 +11,14 @@ export default defineConfig({
     exclude: ["./test/*/**", "node_modules/"],
     runner,
     provide: {
-      benchrunner
+      benchrunner: {
+        warmup: {
+          minMs: 2_000
+        },
+        benchmark: {
+          minMs: 60_000
+        }
+      }
     }
   }
 })
