@@ -36,21 +36,23 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-      // required. You'll likely want to control this with an environment variable
-      runner: "./node_modules/@waynevanson/vitest-benchmark/runner"
+    // required. You'll likely want to control this with an environment variable
+    runner: "@waynevanson/vitest-benchmark/runner"
 
-      // optionally, add the extra reporter
-      reporters: ["default", "./node_modules/@waynevanson/vitest-benchmark/bmf-reporter"],
-      provide: {
-        // Confiure the runner here
-        benchrunner: {
-          benchmark: {
-          minCycles: 64,
-          minMs: 5_000
+    // optionally, add the extra reporter
+    reporters: ["default", "@waynevanson/vitest-benchmark/reporter/bmf"],
+    provide: {
+      // Configuration defaults, recommendations in comments.
+      benchrunner: {
+        benchmark: {
+          // ~1000
+          minCycles: 1,
+          minMs: 0
         },
         warmup: {
-          minCycles: 10,
-          minMs: 200
+          // ~50
+          minCycles: 0,
+          minMs: 0
         }
       }
     }
