@@ -42,8 +42,8 @@ export class VitestBenchRunner extends VitestTestRunner {
     async onBeforeRunSuite(suite) {
         const hooks = getHooks(suite);
         this.#hooks.set(suite, {
-            afterEach: hooks.afterEach,
-            beforeEach: hooks.beforeEach
+            afterEach: hooks.afterEach ?? [],
+            beforeEach: hooks.beforeEach ?? []
         });
         setHooks(suite, {
             ...hooks,

@@ -1,15 +1,13 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
-describe("local", ({}) => {
-  const afterEachOnly = vi.fn()
-  const afterEachBoth = vi.fn()
-
-  const beforeEachOnly = vi.fn()
-  const beforeEachBoth = vi.fn(() => afterEachBoth)
-
-  beforeEach(beforeEachOnly)
-  beforeEach(beforeEachBoth)
-  afterEach(afterEachOnly)
+describe("from setup file", () => {
+  const {
+    afterEachBoth,
+    afterEachOnly,
+    beforeEachBoth,
+    beforeEachOnly
+    //@ts-ignore
+  } = global["GLOBAL_SPEC_TS"]
 
   let ran = false
   test("calls hooks", () => {
@@ -23,12 +21,10 @@ describe("local", ({}) => {
       expect(afterEachBoth).not.toHaveBeenCalled()
       ran = true
     } else {
-      expect(beforeEachOnly).toHaveBeenCalled()
-      expect(beforeEachBoth).toHaveBeenCalled()
+      expect(beforeEachOnly).toHaveBeenCalledTimes(2)
+      expect(beforeEachBoth).toHaveBeenCalledTimes(2)
       expect(afterEachOnly).toHaveBeenCalled()
       expect(afterEachBoth).toHaveBeenCalled()
     }
   })
 })
-
-test.skip("Allow skipping a test")

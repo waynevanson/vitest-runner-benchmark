@@ -58,11 +58,35 @@ expect.extend({
         expected: errors
       }
     }
+  },
+  toHaveNumberOfTests(recieved, count) {
+    const vitest = recieved as Vitest
+
+    const tests = vitest.state
+      .getTestModules()
+      .flatMap((testModule) => Array.from(testModule.children.allTests()))
+
+    if (tests.length === count) {
+      return {
+        pass: true,
+        message() {
+          return `Expected not to have exactly ${count} tests`
+        }
+      }
+    } else {
+      return {
+        pass: false,
+        message() {
+          return `Expected to have exactly ${count} tests but received ${tests.length} test`
+        }
+      }
+    }
   }
 })
 
 interface VitestCustomTestMatchers<T = unknown> {
   toHaveFailedTests(): T
+  toHaveNumberOfTests(count: number): T
 }
 
 declare module "vitest" {

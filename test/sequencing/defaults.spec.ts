@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
-describe("default local", ({}) => {
+describe("default local", () => {
   const afterEachOnly = vi.fn()
   const afterEachBoth = vi.fn()
 
@@ -25,7 +25,7 @@ describe("default local", ({}) => {
     } else {
       expect(beforeEachOnly).toHaveBeenCalledTimes(2)
       expect(beforeEachBoth).toHaveBeenCalledTimes(2)
-      expect(afterEachOnly).toHaveBeenCalledTimes(2)
+      expect(afterEachOnly).toHaveBeenCalledTimes(1)
       expect(afterEachBoth).toHaveBeenCalledTimes(1)
     }
   })

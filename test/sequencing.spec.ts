@@ -9,6 +9,17 @@ describe("sequencing", () => {
       "defaults"
     )
 
+    expect(vitest).toHaveNumberOfTests(2)
+    expect(vitest).not.toHaveFailedTests()
+  })
+
+  test("should use global hooks", async () => {
+    const vitest = await runVitest(
+      path.join(import.meta.dirname, "sequencing"),
+      "global"
+    )
+
+    expect(vitest).toHaveNumberOfTests(1)
     expect(vitest).not.toHaveFailedTests()
   })
 })

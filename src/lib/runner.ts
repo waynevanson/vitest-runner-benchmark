@@ -98,8 +98,8 @@ export class VitestBenchRunner
     const hooks = getHooks(suite)
 
     this.#hooks.set(suite, {
-      afterEach: hooks.afterEach,
-      beforeEach: hooks.beforeEach
+      afterEach: hooks.afterEach ?? [],
+      beforeEach: hooks.beforeEach ?? []
     })
 
     setHooks(suite, {
