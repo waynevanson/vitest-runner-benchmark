@@ -1,8 +1,0 @@
-{
-  "exports": {
-    ".": {
-      "types": "./../dist/silent-reporter.d.ts",
-      "default": "./../dist/silent-reporter.js"
-    }
-  }
-}

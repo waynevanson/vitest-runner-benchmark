@@ -15,12 +15,15 @@ export interface BMFReporterConfig {
 // todo: allow template syntax for saving names
 export class BMFReporter implements Reporter {
   config: BMFReporterConfig = { outputFile: undefined }
+  vitest: Vitest | undefined
 
   onInit(vitest: Vitest) {
     this.config.outputFile =
       typeof vitest.config.outputFile === "string"
         ? vitest.config.outputFile
         : vitest.config.outputFile?.bmf ?? undefined
+
+    this.vitest = vitest
   }
 
   onTestRunEnd(

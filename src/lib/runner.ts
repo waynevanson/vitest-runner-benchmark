@@ -184,8 +184,6 @@ export class VitestBenchRunner
   }
 }
 
-export default VitestBenchRunner
-
 declare module "@vitest/runner" {
   interface TaskMeta {
     bench?: {

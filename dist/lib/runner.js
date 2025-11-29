@@ -104,4 +104,3 @@ export class VitestBenchRunner extends VitestTestRunner {
         return hooks;
     }
 }
-export default VitestBenchRunner;

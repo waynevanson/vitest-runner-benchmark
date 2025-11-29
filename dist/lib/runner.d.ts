@@ -51,7 +51,6 @@ export declare class VitestBenchRunner extends VitestTestRunner implements Vites
     runTask(test: Test): Promise<void>;
     getHooks(suite: Suite): Pick<SuiteHooks<object>, "afterEach" | "beforeEach">;
 }
-export default VitestBenchRunner;
 declare module "@vitest/runner" {
     interface TaskMeta {
         bench?: {

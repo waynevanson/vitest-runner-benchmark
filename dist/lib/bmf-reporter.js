@@ -2,11 +2,13 @@ import { writeFileSync } from "node:fs";
 // todo: allow template syntax for saving names
 export class BMFReporter {
     config = { outputFile: undefined };
+    vitest;
     onInit(vitest) {
         this.config.outputFile =
             typeof vitest.config.outputFile === "string"
                 ? vitest.config.outputFile
                 : vitest.config.outputFile?.bmf ?? undefined;
+        this.vitest = vitest;
     }
     onTestRunEnd(testModules, unhandledErrors, reason) {
         if (reason !== "passed" || unhandledErrors.length > 0)

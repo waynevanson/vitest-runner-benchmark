@@ -17,7 +17,7 @@ describe(fixture.sequencing, () => {
       watch: false,
       maxWorkers: 1,
       root: path.join(import.meta.dirname, fixture.sequencing),
-      reporters: ["../../silent-reporter"]
+      reporters: ["@waynevanson/vitest-benchmark/reporter/silent"]
     })
 
     expect(vitest).not.toHaveFailedTests()

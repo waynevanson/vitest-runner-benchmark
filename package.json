@@ -4,7 +4,7 @@
   "author": {
     "name": "Wayne Van Son"
   },
-  "version": "0.2.6",
+  "version": "0.3.0",
   "files": [
     "dist",
     "runner",
@@ -12,8 +12,12 @@
   ],
   "devDependencies": {
     "@types/node": "^22.19.1",
+    "@types/picomatch": "^4.0.2",
     "@vitest/runner": "^4.0.14",
+    "glob": "^13.0.0",
+    "picomatch": "^4.0.3",
     "typescript": "^5.9.3",
+    "vite-plugin-dts": "^4.5.4",
     "vitest": "^4.0.14"
   },
   "peerDependencies": {
@@ -30,25 +34,22 @@
   },
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+    "./reporter/bmf": {
+      "types": "./dist/public/reporter/bmf.d.ts",
+      "default": "./dist/public/reporter/bmf.js"
     },
-    "./bmf-reporter": {
-      "types": "./dist/bmf-reporter.d.ts",
-      "default": "./dist/bmf-reporter.js"
+    "./reporter/silent": {
+      "types": "./dist/public/reporter/silent.d.ts",
+      "default": "./dist/public/reporter/silent.js"
     },
     "./runner": {
-      "types": "./dist/runner.d.ts",
-      "default": "./dist/runner.js"
+      "types": "./dist/public/runner.d.ts",
+      "default": "./dist/public/runner.js"
     }
   },
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",
-    "benchmark": "vitest run"
+    "test": "vitest run"
   },
-  "packageManager": "pnpm@10.22.0",
-  "dependencies": {
-    "tinyrainbow": "^3.0.3"
-  }
+  "packageManager": "pnpm@10.22.0"
 }
