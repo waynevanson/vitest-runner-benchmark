@@ -1,22 +1,8 @@
 import { DefaultMap, HashMap } from "../hashmap"
-import {
-  Conditional,
-  CONDITIONAL,
-  ConditionalKindWithContexts
-} from "./conditional"
-import {
-  Created,
-  CREATED,
-  CreatedKind,
-  CreatedKindWithContexts
-} from "./create"
-import {
-  Derived,
-  DERIVED,
-  DerivedKind,
-  DerivedKindWithContexts
-} from "./derived"
-import { Struct, STRUCT, StructKindWithContexts } from "./struct"
+import { Conditional, CONDITIONAL } from "./conditional"
+import { Created, CREATED, CreatedKind } from "./create"
+import { Derived, DERIVED, DerivedKind } from "./derived"
+import { Struct, STRUCT } from "./struct"
 import { ContextsKind, SchemaKindWithContexts } from "./types"
 
 export type Id = symbol
@@ -61,14 +47,10 @@ export function createCompile<Contexts extends ContextsKind>() {
       }
     }
 
-    function walk<
-      T extends
-        | CreatedKindWithContexts<Contexts>
-        | DerivedKindWithContexts<Contexts>
-        // todo: make partial on output. true means required, false means removed, boolean means partial.
-        | ConditionalKindWithContexts<Contexts>
-        | StructKindWithContexts<Contexts>
-    >(schema: T, parent: Array<unknown> | Record<string, unknown> | undefined) {
+    function walk<T extends SchemaKindWithContexts<Contexts>>(
+      schema: T,
+      parent: Array<unknown> | Record<string, unknown> | undefined
+    ) {
       switch (schema.type) {
         // just apply it
         case CREATED:
@@ -184,8 +166,6 @@ export function createCompile<Contexts extends ContextsKind>() {
 // how to partition required and non-required keys?
 export type InferOutput<T> = T extends Created<any, infer Output>
   ? Output
-  : T extends Derived<any, infer Output, any>
-  ? Output
   : T extends Conditional<any, infer Condition, infer Fn>
   ? boolean extends Condition
     ? undefined | InferOutput<Fn>
@@ -209,4 +189,6 @@ export type InferOutput<T> = T extends Created<any, infer Output>
           : never
         : never]?: InferOutput<U[P]>
     }
+  : T extends Derived<any, infer Output, any>
+  ? Output
   : never

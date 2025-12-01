@@ -26,8 +26,6 @@ describe("precondition", () => {
 
       const latency = options.derive(time, (time) => time * 2)
 
-      type aaaa = typeof latency
-
       // todo: moving the derive depenendencies to the top is causing some sort of type mismatch.
       const compiled = options.compile(latency)
       const result = compiled({ samples: [1, 3, 5, 7, 11], cycles: 20 })

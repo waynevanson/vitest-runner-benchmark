@@ -1,61 +1,44 @@
 import { InferOutput } from "./compile"
-import { CreatedKindWithContexts } from "./create"
+import { Created, CreatedKind, CreatedKindWithContexts } from "./create"
 import { ContextsKind } from "./types"
 
+// need to unfold the thing.
 export const DERIVED = Symbol("DERIVED")
 export type DERIVED = typeof DERIVED
 
 export interface Derived<
   Contexts extends ContextsKind,
-  Output,
-  Dependencies extends DependenciesKindWithContexts<Contexts>
+  Inputs extends Array<unknown>,
+  Output
 > {
-  (...args: DerivedFnArgs<Contexts, Dependencies>): Output
-  dependencies: Dependencies
+  (...args: [...inputs: Inputs, ...contexts: Contexts]): Output
+  dependencies: Inputs
   type: DERIVED
   id: symbol
 }
 
-export type DerivedFnArgs<
-  Contexts extends ContextsKind,
-  Dependencies extends DependenciesKindWithContexts<Contexts>
-> = [
-  ...dependencies: { [P in keyof Dependencies]: InferOutput<Dependencies[P]> },
-  ...contexts: Contexts
-]
-
-export type DependenciesKindWithContexts<Contexts extends ContextsKind> = [
-  CreatedKindWithContexts<Contexts> | DerivedKindWithContexts<Contexts>,
-  ...Array<
-    CreatedKindWithContexts<Contexts> | DerivedKindWithContexts<Contexts>
-  >
-]
-
-export type DerivedKindWithContexts<Contexts extends ContextsKind> = Derived<
-  Contexts,
-  unknown,
-  DependenciesKindWithContexts<Contexts>
->
-
-export type DerivedKind = DerivedKindWithContexts<ContextsKind>
+export type InputsKind = Array<unknown>
+export type DerivedKind = Derived<ContextsKind, InputsKind, unknown>
 
 export function createDerived<Contexts extends ContextsKind>() {
-  return function derive<
-    Dependencies extends DependenciesKindWithContexts<Contexts>,
-    Output
-  >(
+  // make dependencies the input types
+  return function derive<Inputs extends InputsKind, Output>(
     ...args: [
-      ...dependencies: Dependencies,
-      fn: (...args: DerivedFnArgs<Contexts, Dependencies>) => Output
+      ...schemas: {
+        [P in keyof Inputs]:
+          | Derived<Contexts, InputsKind, Inputs[P]>
+          | Created<Contexts, Inputs[P]>
+      },
+      fn: (...args: [...inputs: Inputs, ...Contexts]) => Output
     ]
-  ): Derived<Contexts, Output, Dependencies> {
-    const dependencies = args.slice(0, args.length - 1) as Dependencies
+  ): Derived<Contexts, Inputs, Output> {
+    const dependencies = args.slice(0, args.length - 1) as Inputs
 
     const fn = args[args.length - 1] as (
-      ...args: DerivedFnArgs<Contexts, Dependencies>
+      ...args: [...inputs: Inputs, ...Contexts]
     ) => Output
 
-    function derive(...args: DerivedFnArgs<Contexts, Dependencies>) {
+    function derive(...args: [...inputs: Inputs, ...Contexts]) {
       return fn(...args)
     }
 

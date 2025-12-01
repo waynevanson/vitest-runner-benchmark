@@ -1,6 +1,6 @@
 import { ConditionalKind, ConditionalKindWithContexts } from "./conditional"
 import { CreatedKind, CreatedKindWithContexts } from "./create"
-import { DerivedKind, DerivedKindWithContexts } from "./derived"
+import { DerivedKind } from "./derived"
 import { StructKind, StructKindWithContexts } from "./struct"
 
 export type SchemaKind =
@@ -8,11 +8,5 @@ export type SchemaKind =
   | DerivedKind
   | ConditionalKind
   | StructKind
-
-export type SchemaKindWithContexts<Contexts extends ContextsKind> =
-  | CreatedKindWithContexts<Contexts>
-  | DerivedKindWithContexts<Contexts>
-  | ConditionalKindWithContexts<Contexts>
-  | StructKindWithContexts<Contexts>
 
 export type ContextsKind = Array<unknown>
