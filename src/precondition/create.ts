@@ -1,7 +1,7 @@
 import { ContextsKind } from "./types"
 
 export interface Created<Contexts extends ContextsKind, Output> {
-  fn(...contexts: Contexts): Output
+  (...contexts: Contexts): Output
   type: "CREATED"
   id: symbol
 }
@@ -17,10 +17,13 @@ export function createCreate<Contexts extends ContextsKind>() {
   return function create<Output>(
     fn: (...contexts: Contexts) => Output
   ): Created<Contexts, Output> {
-    return {
-      fn,
-      type: "CREATED",
-      id: Symbol()
+    function create(...contexts: Contexts): Output {
+      return fn(...contexts)
     }
+
+    create.id = Symbol()
+    create.type = "CREATED" as const
+
+    return create
   }
 }

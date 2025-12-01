@@ -56,7 +56,7 @@ export function createCompile<Contexts extends ContextsKind>() {
       switch (schema.type) {
         // just apply it
         case "CREATED":
-          fns.setOnce(schema.id, schema.fn)
+          fns.setOnce(schema.id, schema)
           break
 
         case "DERIVED": {
