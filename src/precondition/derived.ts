@@ -1,6 +1,9 @@
 import { Created } from "./create"
 import { ContextsKind } from "./types"
 
+export const DERIVED = Symbol("DERIVED")
+export type DERIVED = typeof DERIVED
+
 export interface Derived<
   Contexts extends ReadonlyArray<unknown>,
   Output,
@@ -10,7 +13,7 @@ export interface Derived<
   deps: {
     [P in keyof Dependencies]: Created<Contexts, Dependencies[P]>
   }
-  type: "DERIVED"
+  type: DERIVED
   id: symbol
 }
 
@@ -48,7 +51,7 @@ export function createDerived<Contexts extends ContextsKind>() {
     return {
       deps,
       fn,
-      type: "DERIVED",
+      type: DERIVED,
       id: Symbol()
     }
   }

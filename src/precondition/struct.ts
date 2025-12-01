@@ -3,12 +3,15 @@ import { CreatedKindWithContexts } from "./create"
 import { DerivedKindWithContexts } from "./derived"
 import { ContextsKind, SchemaKindWithContexts } from "./types"
 
+export const STRUCT = Symbol("STRUCT")
+export type STRUCT = typeof STRUCT
+
 export interface Struct<
   Contexts extends ContextsKind,
   T extends Record<string, SchemaKindWithContexts<Contexts>>
 > {
   entries: T
-  type: "STRUCT"
+  type: STRUCT
   id: symbol
 }
 
@@ -29,7 +32,7 @@ export function createStruct<Contexts extends ContextsKind>() {
     >
   >(entries: T): Struct<Contexts, T> {
     return {
-      type: "STRUCT",
+      type: STRUCT,
       entries,
       id: Symbol()
     }

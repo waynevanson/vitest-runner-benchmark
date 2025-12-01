@@ -2,6 +2,9 @@ import { CreatedKindWithContexts, Created } from "./create"
 import { DerivedKindWithContexts, Derived, DependenciesKind } from "./derived"
 import { ContextsKind } from "./types"
 
+export const CONDITIONAL = Symbol("CONDITIONAL")
+export type CONDITIONAL = typeof CONDITIONAL
+
 export interface Conditional<
   Contexts extends ContextsKind,
   Condition extends boolean,
@@ -10,7 +13,7 @@ export interface Conditional<
     | Derived<Contexts, unknown, DependenciesKind>
 > {
   condition: Condition
-  type: "CONDITIONAL"
+  type: CONDITIONAL
   fn: Fn
   id: symbol
 }
@@ -36,7 +39,7 @@ export function createConditional<Contexts extends ContextsKind>() {
     return {
       condition,
       fn,
-      type: "CONDITIONAL",
+      type: CONDITIONAL,
       id: Symbol()
     }
   }

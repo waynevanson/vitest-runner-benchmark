@@ -1,8 +1,8 @@
 import { DefaultMap, HashMap } from "../hashmap"
-import { ConditionalKindWithContexts } from "./conditional"
+import { CONDITIONAL, ConditionalKindWithContexts } from "./conditional"
 import { CREATED, CreatedKindWithContexts } from "./create"
-import { DerivedKindWithContexts } from "./derived"
-import { StructKindWithContexts } from "./struct"
+import { DERIVED, DerivedKindWithContexts } from "./derived"
+import { STRUCT, StructKindWithContexts } from "./struct"
 import { ContextsKind, SchemaKind } from "./types"
 
 export type Id = symbol
@@ -59,7 +59,7 @@ export function createCompile<Contexts extends ContextsKind>() {
           fns.setOnce(schema.id, schema)
           break
 
-        case "DERIVED": {
+        case DERIVED: {
           fns.setOnce(schema.id, schema.fn)
 
           const friends = dependsOn.ensure(schema.id)
@@ -72,7 +72,7 @@ export function createCompile<Contexts extends ContextsKind>() {
           break
         }
 
-        case "CONDITIONAL":
+        case CONDITIONAL:
           if (!schema.condition) {
             return
           }
@@ -81,7 +81,7 @@ export function createCompile<Contexts extends ContextsKind>() {
 
           break
 
-        case "STRUCT": {
+        case STRUCT: {
           const parent = {} as ParentObject
           objects.setOnce(schema.id, parent)
 
@@ -89,7 +89,7 @@ export function createCompile<Contexts extends ContextsKind>() {
           for (const name in schema.entries) {
             // schema
             const entry = schema.entries[name]
-            parent[name] = entry.type === "CONDITIONAL" ? entry.fn.id : entry.id
+            parent[name] = entry.type === CONDITIONAL ? entry.fn.id : entry.id
 
             friends.add(entry.id)
 
@@ -141,7 +141,7 @@ export function createCompile<Contexts extends ContextsKind>() {
       // then walk through the leaves of an object, replacing ID's with actual values
 
       switch (schema.type) {
-        case "CONDITIONAL": {
+        case CONDITIONAL: {
           if (!schema.condition) {
             return
           }
@@ -150,10 +150,10 @@ export function createCompile<Contexts extends ContextsKind>() {
         }
 
         case CREATED:
-        case "DERIVED":
+        case DERIVED:
           return results.get(schema.id)!
 
-        case "STRUCT":
+        case STRUCT:
           return resolve(objects.get(schema.id)!, results)
 
         default:
