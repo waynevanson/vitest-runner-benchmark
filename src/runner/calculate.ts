@@ -42,9 +42,7 @@ export function createCalculator(
   )
 
   const latencyPercentiles = c.gets((context) =>
-    config.latency.percentiles.map((percentile) =>
-      calculatePercentile(context.samples, percentile)
-    )
+    calcPer(context.samples, config.latency.percentiles)
   )
 
   const latency = c.collapsible({
@@ -61,10 +59,22 @@ export function createCalculator(
     context.samples.map((duration) => 1 / duration)
   )
 
+  function calcPer(samples: Array<number>, percentiles: Array<number>) {
+    return percentiles.reduce((accu, percentile) => {
+      let name = percentile.toPrecision()
+      if (name.length === 3) {
+        name = percentile.toPrecision(2)
+      }
+      name = name.slice(2)
+
+      const value = calculatePercentile(samples, percentile)
+      accu[name] = value
+      return accu
+    }, {} as Record<string, number>)
+  }
+
   const throughputPercentiles = c.derive(cyclomes, (cyclomes) =>
-    config.throughput.percentiles.map((percentile) =>
-      calculatePercentile(cyclomes, percentile)
-    )
+    calcPer(cyclomes, config.throughput.percentiles)
   )
 
   const throughput = c.collapsible({
@@ -76,8 +86,6 @@ export function createCalculator(
       throughputPercentiles
     )
   })
-
-  // todo: percentiles for throughput.
 
   const schema = c.collapsible({
     samples: c.conditional(

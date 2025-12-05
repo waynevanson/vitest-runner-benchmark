@@ -14,7 +14,7 @@ describe("task-states", () => {
     expect(vitest).toHaveSkippedTests()
   })
 
-  test("should contain skipped tests", async () => {
+  test("should skip all tests but the only", async () => {
     const vitest = await runVitest(
       path.join(import.meta.dirname, "task-states"),
       "only"

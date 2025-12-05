@@ -43,12 +43,18 @@ export type VitestBenchRunnerUserConfig = v.InferInput<typeof schema>
 
 export type VitestBenchRunnerConfig = v.InferOutput<typeof schema>
 
-export type BenchRunnerMeta = DeepPartialReplace<
-  Pick<VitestBenchRunnerConfig["results"], "latency" | "throughput">,
-  boolean,
-  number
-> & { samples?: Array<number> }
-
-type DeepPartialReplace<T, U, V> = {
-  [P in keyof T]?: T[P] extends U ? V : DeepPartialReplace<T[P], U, V>
+export type BenchRunnerMeta = {
+  samples?: Array<number>
+  latency?: {
+    min?: number
+    max?: number
+    average?: number
+    percentiles?: Record<string, number>
+  }
+  throughput?: {
+    min?: number
+    max?: number
+    average?: number
+    percentiles?: Record<string, number>
+  }
 }

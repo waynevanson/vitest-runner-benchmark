@@ -6,6 +6,7 @@ import {
   Vitest
 } from "vitest/node"
 import { writeFileSync } from "node:fs"
+import test from "node:test"
 
 export interface Measure {
   value: number
@@ -57,7 +58,11 @@ export default class BMFReporter implements Reporter {
           throw new Error("Expected test to report a benchmark")
         }
 
-        const name = [testModule.project.name, testCase.fullName]
+        // todo: add project name
+        const name = [
+          //@ts-expect-error`
+          testCase.task.fullName
+        ]
           .filter(Boolean)
           .join(" # ")
 
@@ -71,7 +76,39 @@ export default class BMFReporter implements Reporter {
           )
         }
 
-        // bmf[name] = meta.benchrunner.
+        const results = meta.benchrunner
+
+        const measures = {} as Measures
+
+        applyIfValid(measures, "Latency", {
+          value: results?.latency?.average,
+          lower_value: results?.latency?.min,
+          upper_value: results?.latency?.max
+        })
+
+        applyIfValid(measures, "Throughput", {
+          value: results?.throughput?.average,
+          lower_value: results?.throughput?.min,
+          upper_value: results?.throughput?.max
+        })
+
+        if (results.latency?.percentiles) {
+          for (const percentile in results.latency.percentiles) {
+            applyIfValid(measures, `Latency P${percentile}`, {
+              value: results.latency.percentiles[percentile]
+            })
+          }
+        }
+
+        if (results.throughput?.percentiles) {
+          for (const percentile in results.throughput.percentiles) {
+            applyIfValid(measures, `Throughput P${percentile}`, {
+              value: results.throughput.percentiles[percentile]
+            })
+          }
+        }
+
+        bmf[name] = measures
       }
     }
 
@@ -82,5 +119,24 @@ export default class BMFReporter implements Reporter {
     } else {
       console.log(data)
     }
+  }
+}
+
+function applyIfValid(
+  bmf: Measures,
+  name: string,
+  measurable: Partial<Measure>
+) {
+  for (const property in measurable) {
+    //@ts-ignore
+    const value = measurable[property]
+    if (value === undefined) {
+      //@ts-ignore
+      delete measurable[property]
+    }
+  }
+
+  if (Object.keys(measurable).length > 0) {
+    bmf[name] = measurable as Measure
   }
 }

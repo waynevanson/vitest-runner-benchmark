@@ -20,7 +20,11 @@ export default class BMFReporter {
                 if (!meta.benchrunner) {
                     throw new Error("Expected test to report a benchmark");
                 }
-                const name = [testModule.project.name, testCase.fullName]
+                // todo: add project name
+                const name = [
+                    //@ts-expect-error`
+                    testCase.task.fullName
+                ]
                     .filter(Boolean)
                     .join(" # ");
                 if (name in bmf) {
@@ -30,7 +34,33 @@ export default class BMFReporter {
                         `If these tests are in two different projects, please add a project name in the vitest config to fix.`
                     ].join("\n"));
                 }
-                // bmf[name] = meta.benchrunner.
+                const results = meta.benchrunner;
+                const measures = {};
+                applyIfValid(measures, "Latency", {
+                    value: results?.latency?.average,
+                    lower_value: results?.latency?.min,
+                    upper_value: results?.latency?.max
+                });
+                applyIfValid(measures, "Throughput", {
+                    value: results?.throughput?.average,
+                    lower_value: results?.throughput?.min,
+                    upper_value: results?.throughput?.max
+                });
+                if (results.latency?.percentiles) {
+                    for (const percentile in results.latency.percentiles) {
+                        applyIfValid(measures, `Latency P${percentile}`, {
+                            value: results.latency.percentiles[percentile]
+                        });
+                    }
+                }
+                if (results.throughput?.percentiles) {
+                    for (const percentile in results.throughput.percentiles) {
+                        applyIfValid(measures, `Throughput P${percentile}`, {
+                            value: results.throughput.percentiles[percentile]
+                        });
+                    }
+                }
+                bmf[name] = measures;
             }
         }
         const data = JSON.stringify(bmf);
@@ -40,5 +70,18 @@ export default class BMFReporter {
         else {
             console.log(data);
         }
+    }
+}
+function applyIfValid(bmf, name, measurable) {
+    for (const property in measurable) {
+        //@ts-ignore
+        const value = measurable[property];
+        if (value === undefined) {
+            //@ts-ignore
+            delete measurable[property];
+        }
+    }
+    if (Object.keys(measurable).length > 0) {
+        bmf[name] = measurable;
     }
 }
