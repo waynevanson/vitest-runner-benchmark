@@ -1,12 +1,12 @@
 import {
   Reporter,
   SerializedError,
+  TestCase,
   TestModule,
   TestRunEndReason,
   Vitest
 } from "vitest/node"
 import { writeFileSync } from "node:fs"
-import test from "node:test"
 
 export interface Measure {
   value: number
@@ -52,19 +52,7 @@ export default class BMFReporter implements Reporter {
 
     for (const testModule of testModules) {
       for (const testCase of testModule.children.allTests("passed")) {
-        const meta = testCase.meta()
-
-        if (!meta.benchrunner) {
-          throw new Error("Expected test to report a benchmark")
-        }
-
-        // todo: add project name
-        const name = [
-          //@ts-expect-error`
-          testCase.task.fullName
-        ]
-          .filter(Boolean)
-          .join(" # ")
+        const name = createBenchmarkName(testCase)
 
         if (name in bmf) {
           throw new Error(
@@ -76,37 +64,7 @@ export default class BMFReporter implements Reporter {
           )
         }
 
-        const results = meta.benchrunner
-
-        const measures = {} as Measures
-
-        applyIfValid(measures, "Latency", {
-          value: results?.latency?.average,
-          lower_value: results?.latency?.min,
-          upper_value: results?.latency?.max
-        })
-
-        applyIfValid(measures, "Throughput", {
-          value: results?.throughput?.average,
-          lower_value: results?.throughput?.min,
-          upper_value: results?.throughput?.max
-        })
-
-        if (results.latency?.percentiles) {
-          for (const percentile in results.latency.percentiles) {
-            applyIfValid(measures, `Latency P${percentile}`, {
-              value: results.latency.percentiles[percentile]
-            })
-          }
-        }
-
-        if (results.throughput?.percentiles) {
-          for (const percentile in results.throughput.percentiles) {
-            applyIfValid(measures, `Throughput P${percentile}`, {
-              value: results.throughput.percentiles[percentile]
-            })
-          }
-        }
+        const measures = createBenchmarkMeasures(testCase)
 
         bmf[name] = measures
       }
@@ -122,21 +80,96 @@ export default class BMFReporter implements Reporter {
   }
 }
 
-function applyIfValid(
-  bmf: Measures,
-  name: string,
-  measurable: Partial<Measure>
-) {
-  for (const property in measurable) {
-    //@ts-ignore
-    const value = measurable[property]
-    if (value === undefined) {
-      //@ts-ignore
-      delete measurable[property]
-    }
+function createBenchmarkName(testCase: TestCase): string {
+  // todo: add project name
+  //@ts-expect-error`
+  return [testCase.task.fullName].filter(Boolean).join(" # ")
+}
+
+export function createBenchmarkMeasures(testCase: TestCase) {
+  const meta = testCase.meta()
+
+  if (!meta.benchrunner) {
+    throw new Error("Expected test to report a benchmark")
   }
 
-  if (Object.keys(measurable).length > 0) {
-    bmf[name] = measurable as Measure
+  const results = meta.benchrunner
+
+  const latency = createMeasure({
+    value: results?.latency?.average,
+    lower_value: results?.latency?.min,
+    upper_value: results?.latency?.max
+  })
+
+  const throughput = createMeasure({
+    value: results?.throughput?.average,
+    lower_value: results?.throughput?.min,
+    upper_value: results?.throughput?.max
+  })
+
+  const latencyPercentiles = createPercentiles(
+    "Latency",
+    results.latency?.percentiles
+  )
+
+  const throughputPercentiles = createPercentiles(
+    "Throughput",
+    results?.throughput?.percentiles
+  )
+
+  const measurables = {
+    ...latencyPercentiles,
+    ...throughputPercentiles
+  } as Measures
+
+  if (latency) {
+    measurables.Latency = latency
   }
+
+  if (throughput) {
+    measurables.Throughput = throughput
+  }
+
+  return measurables
+}
+
+function createMeasure(partial: Partial<Measure>) {
+  const measure = {} as Measure
+
+  if (partial.value === undefined) {
+    return undefined
+  }
+
+  measure.value = partial.value
+
+  for (const property of ["lower_value", "upper_value"] as const) {
+    const value = partial[property]
+
+    if (value === undefined) {
+      continue
+    }
+
+    measure[property] = partial[property]
+  }
+
+  return measure
+}
+
+export function createPercentiles(
+  category: string,
+  percentiles: Record<string, number> = {}
+): Record<string, Measure> | undefined {
+  if (Object.keys(percentiles).length === 0) {
+    return undefined
+  }
+
+  const measures = {} as Record<string, Measure>
+
+  for (const percentile in percentiles) {
+    const name = `${category} P${percentile}`
+    const value = percentiles[percentile]
+    measures[name] = { value }
+  }
+
+  return measures
 }

@@ -16,17 +16,7 @@ export default class BMFReporter {
         const bmf = {};
         for (const testModule of testModules) {
             for (const testCase of testModule.children.allTests("passed")) {
-                const meta = testCase.meta();
-                if (!meta.benchrunner) {
-                    throw new Error("Expected test to report a benchmark");
-                }
-                // todo: add project name
-                const name = [
-                    //@ts-expect-error`
-                    testCase.task.fullName
-                ]
-                    .filter(Boolean)
-                    .join(" # ");
+                const name = createBenchmarkName(testCase);
                 if (name in bmf) {
                     throw new Error([
                         `Expected "${name}" not to exist as a benchmark name.`,
@@ -34,32 +24,7 @@ export default class BMFReporter {
                         `If these tests are in two different projects, please add a project name in the vitest config to fix.`
                     ].join("\n"));
                 }
-                const results = meta.benchrunner;
-                const measures = {};
-                applyIfValid(measures, "Latency", {
-                    value: results?.latency?.average,
-                    lower_value: results?.latency?.min,
-                    upper_value: results?.latency?.max
-                });
-                applyIfValid(measures, "Throughput", {
-                    value: results?.throughput?.average,
-                    lower_value: results?.throughput?.min,
-                    upper_value: results?.throughput?.max
-                });
-                if (results.latency?.percentiles) {
-                    for (const percentile in results.latency.percentiles) {
-                        applyIfValid(measures, `Latency P${percentile}`, {
-                            value: results.latency.percentiles[percentile]
-                        });
-                    }
-                }
-                if (results.throughput?.percentiles) {
-                    for (const percentile in results.throughput.percentiles) {
-                        applyIfValid(measures, `Throughput P${percentile}`, {
-                            value: results.throughput.percentiles[percentile]
-                        });
-                    }
-                }
+                const measures = createBenchmarkMeasures(testCase);
                 bmf[name] = measures;
             }
         }
@@ -72,16 +37,65 @@ export default class BMFReporter {
         }
     }
 }
-function applyIfValid(bmf, name, measurable) {
-    for (const property in measurable) {
-        //@ts-ignore
-        const value = measurable[property];
+function createBenchmarkName(testCase) {
+    // todo: add project name
+    //@ts-expect-error`
+    return [testCase.task.fullName].filter(Boolean).join(" # ");
+}
+export function createBenchmarkMeasures(testCase) {
+    const meta = testCase.meta();
+    if (!meta.benchrunner) {
+        throw new Error("Expected test to report a benchmark");
+    }
+    const results = meta.benchrunner;
+    const latency = createMeasure({
+        value: results?.latency?.average,
+        lower_value: results?.latency?.min,
+        upper_value: results?.latency?.max
+    });
+    const throughput = createMeasure({
+        value: results?.throughput?.average,
+        lower_value: results?.throughput?.min,
+        upper_value: results?.throughput?.max
+    });
+    const latencyPercentiles = createPercentiles("Latency", results.latency?.percentiles);
+    const throughputPercentiles = createPercentiles("Throughput", results?.throughput?.percentiles);
+    const measurables = {
+        ...latencyPercentiles,
+        ...throughputPercentiles
+    };
+    if (latency) {
+        measurables.Latency = latency;
+    }
+    if (throughput) {
+        measurables.Throughput = throughput;
+    }
+    return measurables;
+}
+function createMeasure(partial) {
+    const measure = {};
+    if (partial.value === undefined) {
+        return undefined;
+    }
+    measure.value = partial.value;
+    for (const property of ["lower_value", "upper_value"]) {
+        const value = partial[property];
         if (value === undefined) {
-            //@ts-ignore
-            delete measurable[property];
+            continue;
         }
+        measure[property] = partial[property];
     }
-    if (Object.keys(measurable).length > 0) {
-        bmf[name] = measurable;
+    return measure;
+}
+export function createPercentiles(category, percentiles = {}) {
+    if (Object.keys(percentiles).length === 0) {
+        return undefined;
     }
+    const measures = {};
+    for (const percentile in percentiles) {
+        const name = `${category} P${percentile}`;
+        const value = percentiles[percentile];
+        measures[name] = { value };
+    }
+    return measures;
 }
