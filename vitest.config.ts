@@ -13,10 +13,24 @@ export default defineConfig({
     provide: {
       benchrunner: {
         warmup: {
-          // minMs: 2_000
+          minMs: 2_000
         },
         benchmark: {
-          // minMs: 60_000
+          minMs: 60_000
+        },
+        results: {
+          latency: {
+            average: true,
+            max: true,
+            min: true,
+            percentiles: [0.999, 0.99, 0.9, 0.75, 0.5]
+          },
+          throughput: {
+            average: true,
+            max: true,
+            min: true,
+            percentiles: [0.999, 0.99, 0.9, 0.75, 0.5]
+          }
         }
       }
     }

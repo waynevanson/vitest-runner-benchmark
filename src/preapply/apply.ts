@@ -14,16 +14,12 @@ export function apply<TSchema extends Schema<unknown>>(
     return cache.get(schema)!
   }
 
-  let rootReferenced = false
-
   function walk(schema: Schema<InferContext<TSchema>>): any {
     switch (schema.type) {
       case "Get": {
-        rootReferenced = true
         return context
       }
       case "Gets": {
-        rootReferenced = true
         return hit(schema, () => schema.fn(context))
       }
       case "Derive": {
@@ -88,13 +84,7 @@ export function apply<TSchema extends Schema<unknown>>(
     }
   }
 
-  const root = walk(schema)
-
-  if (!rootReferenced) {
-    throw new Error("Root was not referenced")
-  }
-
-  return root as any
+  return walk(schema)
 }
 
 export function createApply<TSchema extends Schema<unknown>>(schema: TSchema) {
