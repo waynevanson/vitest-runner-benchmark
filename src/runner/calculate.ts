@@ -1,6 +1,72 @@
 import { BenchRunnerMeta, VitestBenchRunnerConfig } from "./config"
+import { contextualize, createApply } from "../preapply"
 
 type Optional<T> = { enabled: false } | { enabled: true; with: T }
+
+const c = contextualize<{ samples: Array<number>; cycles: number }>()
+export function createCalculationsSchema(
+  config: VitestBenchRunnerConfig["results"]
+) {
+  const context = c.get()
+
+  const duration = c.gets((context) =>
+    context.samples.reduce((accu, curr) => accu + curr, 0)
+  )
+
+  const latencyAverage = c.derive(
+    c.structural({ context, duration }),
+    ({ context, duration }) => duration / context.samples.length
+  )
+
+  const latencyMin = c.gets((context) =>
+    context.samples.reduce((accu, curr) => Math.min(accu, curr))
+  )
+
+  const latencyMax = c.gets((context) =>
+    context.samples.reduce((accu, curr) => Math.max(accu, curr))
+  )
+
+  const throughputAverage = c.derive(
+    c.structural({ context, duration }),
+    ({ context, duration }) => context.cycles / duration
+  )
+
+  const throughputMin = c.derive(
+    c.structural({ context, latencyMax }),
+    ({ context, latencyMax }) =>
+      context.cycles / (context.samples.length * latencyMax)
+  )
+
+  const throughputMax = c.derive(
+    c.structural({ context, latencyMin }),
+    ({ context, latencyMin }) =>
+      context.cycles / (context.samples.length * latencyMin)
+  )
+
+  const latency = c.collapsible({
+    average: c.conditional(config.latency.average, latencyAverage),
+    min: c.conditional(config.latency.min, latencyMin),
+    max: c.conditional(config.latency.max, latencyMax)
+  })
+
+  const throughput = c.collapsible({
+    average: c.conditional(config.throughput.average, throughputAverage),
+    min: c.conditional(config.throughput.min, throughputMin),
+    max: c.conditional(config.throughput.max, throughputMax)
+  })
+  // todo: percentiles
+
+  const schema = c.collapsible({
+    samples: c.conditional(
+      config.samples,
+      c.gets((context) => context.samples)
+    ),
+    latency,
+    throughput
+  })
+
+  return createApply(schema)
+}
 
 // this is purely for calculations, not what we return back
 export type ResultsConfig = {
