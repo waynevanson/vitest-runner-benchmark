@@ -6,10 +6,6 @@ export function lazy<TOutput>(thunk: () => TOutput) {
   return function get(): TOutput {
     if (result === CACHE_MISS) {
       result = thunk()
-
-      setTimeout(() => {
-        result = CACHE_MISS
-      }, 0)
     }
 
     return result
