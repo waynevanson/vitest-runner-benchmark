@@ -40,12 +40,17 @@ export default class BMFReporter implements Reporter {
   onInit(vitest: Vitest) {
     const userOptions: BMFReporterUserOptions =
       //@ts-expect-error
-      vitest.config.reporters.find((value) => value[0] === "bmf")?.[1] ?? {}
+      vitest.config.reporters.find(
+        //@ts-expect-error
+        (value) => value[0] === "@waynevanson/vitest-benchmark/reporter/bmf"
+      )?.[1] ?? {}
 
     this.config.outputFile =
       typeof vitest.config.outputFile === "string"
         ? vitest.config.outputFile
-        : vitest.config.outputFile?.bmf ?? userOptions.outputFile
+        : vitest.config.outputFile?.[
+            "@waynevanson/vitest-benchmark/reporter/bmf"
+          ] ?? userOptions.outputFile
 
     this.config.prefix = userOptions.prefix ?? ""
 
