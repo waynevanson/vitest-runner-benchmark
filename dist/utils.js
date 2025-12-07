@@ -1,12 +1,9 @@
 const CACHE_MISS = Symbol("CACHE_MISS");
-export function lazy(thunk) {
+export function memo(thunk) {
     let result = CACHE_MISS;
     return function get() {
         if (result === CACHE_MISS) {
             result = thunk();
-            setTimeout(() => {
-                result = CACHE_MISS;
-            }, 0);
         }
         return result;
     };

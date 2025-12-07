@@ -1,23 +1,23 @@
-import { collapse, conditional, lazy } from "../utils.js";
+import { collapse, conditional, memo } from "../utils.js";
 export function calculate(config, context) {
     // side effect here will be okay.
-    const sorted = lazy(() => context.durations.sort());
-    const rates = lazy(() => sorted().map((duration) => 1 / duration));
-    const totalDuration = lazy(() => context.durations.reduce((accu, curr) => accu + curr, 0));
-    const latencyAverage = lazy(() => totalDuration() / context.durations.length);
-    const latencyMin = lazy(() => context.durations.reduce((accu, curr) => Math.min(accu, curr)));
-    const latencyMax = lazy(() => context.durations.reduce((accu, curr) => Math.max(accu, curr)));
-    const throughputAverage = lazy(() => context.cycles / totalDuration());
-    const throughputMin = lazy(() => context.cycles / (context.durations.length * latencyMax()));
-    const throughputMax = lazy(() => context.cycles / (context.durations.length * latencyMin()));
-    const latencyPercentiles = lazy(() => calculatePercentiles(sorted(), config.latency.percentiles));
+    const sorted = memo(() => context.durations.sort());
+    const rates = memo(() => sorted().map((duration) => 1 / duration));
+    const totalDuration = memo(() => context.durations.reduce((accu, curr) => accu + curr, 0));
+    const latencyAverage = memo(() => totalDuration() / context.durations.length);
+    const latencyMin = memo(() => context.durations.reduce((accu, curr) => Math.min(accu, curr)));
+    const latencyMax = memo(() => context.durations.reduce((accu, curr) => Math.max(accu, curr)));
+    const throughputAverage = memo(() => context.cycles / totalDuration());
+    const throughputMin = memo(() => context.cycles / (context.durations.length * latencyMax()));
+    const throughputMax = memo(() => context.cycles / (context.durations.length * latencyMin()));
+    const latencyPercentiles = memo(() => calculatePercentiles(sorted(), config.latency.percentiles));
     const latency = collapse({
         average: conditional(config.latency.average, latencyAverage),
         min: conditional(config.latency.min, latencyMin),
         max: conditional(config.latency.max, latencyMax),
         percentiles: conditional(config.latency.percentiles.length > 0, latencyPercentiles)
     });
-    const throughputPercentiles = lazy(() => calculatePercentiles(rates(), config.throughput.percentiles));
+    const throughputPercentiles = memo(() => calculatePercentiles(rates(), config.throughput.percentiles));
     const throughput = collapse({
         average: conditional(config.throughput.average, throughputAverage),
         min: conditional(config.throughput.min, throughputMin),

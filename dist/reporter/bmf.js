@@ -41,7 +41,6 @@ export default class BMFReporter {
     }
 }
 function createBenchmarkName(testCase) {
-    console.log(testCase);
     // todo: add project name
     //@ts-expect-error`
     return [testCase.task.fullName].filter(Boolean).join(" # ");
