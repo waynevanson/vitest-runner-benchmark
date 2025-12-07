@@ -1,6 +1,6 @@
 const CACHE_MISS = Symbol("CACHE_MISS")
 
-export function lazy<TOutput>(thunk: () => TOutput) {
+export function memo<TOutput>(thunk: () => TOutput) {
   let result: typeof CACHE_MISS | TOutput = CACHE_MISS
 
   return function get(): TOutput {

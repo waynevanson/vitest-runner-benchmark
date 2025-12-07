@@ -1,4 +1,4 @@
-import { collapse, conditional, lazy } from "../utils.js"
+import { collapse, conditional, memo } from "../utils.js"
 import { VitestBenchRunnerConfig, BenchRunnerMeta } from "./config.js"
 
 export function calculate(
@@ -6,35 +6,35 @@ export function calculate(
   context: { durations: Array<number>; cycles: number }
 ): BenchRunnerMeta | undefined {
   // side effect here will be okay.
-  const sorted = lazy(() => context.durations.sort())
+  const sorted = memo(() => context.durations.sort())
 
-  const rates = lazy(() => sorted().map((duration) => 1 / duration))
+  const rates = memo(() => sorted().map((duration) => 1 / duration))
 
-  const totalDuration = lazy(() =>
+  const totalDuration = memo(() =>
     context.durations.reduce((accu, curr) => accu + curr, 0)
   )
 
-  const latencyAverage = lazy(() => totalDuration() / context.durations.length)
+  const latencyAverage = memo(() => totalDuration() / context.durations.length)
 
-  const latencyMin = lazy(() =>
+  const latencyMin = memo(() =>
     context.durations.reduce((accu, curr) => Math.min(accu, curr))
   )
 
-  const latencyMax = lazy(() =>
+  const latencyMax = memo(() =>
     context.durations.reduce((accu, curr) => Math.max(accu, curr))
   )
 
-  const throughputAverage = lazy(() => context.cycles / totalDuration())
+  const throughputAverage = memo(() => context.cycles / totalDuration())
 
-  const throughputMin = lazy(
+  const throughputMin = memo(
     () => context.cycles / (context.durations.length * latencyMax())
   )
 
-  const throughputMax = lazy(
+  const throughputMax = memo(
     () => context.cycles / (context.durations.length * latencyMin())
   )
 
-  const latencyPercentiles = lazy(() =>
+  const latencyPercentiles = memo(() =>
     calculatePercentiles(sorted(), config.latency.percentiles)
   )
 
@@ -48,7 +48,7 @@ export function calculate(
     )
   })
 
-  const throughputPercentiles = lazy(() =>
+  const throughputPercentiles = memo(() =>
     calculatePercentiles(rates(), config.throughput.percentiles)
   )
 
