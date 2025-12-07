@@ -2,13 +2,17 @@ import { writeFileSync } from "node:fs";
 import { collapse } from "../utils.js";
 // todo: allow template syntax for saving names
 export default class BMFReporter {
-    config = { outputFile: undefined };
+    config = { outputFile: undefined, prefix: "" };
     vitest;
     onInit(vitest) {
+        const userOptions = 
+        //@ts-expect-error
+        vitest.config.reporters.find((value) => value[0] === "bmf")?.[1] ?? {};
         this.config.outputFile =
             typeof vitest.config.outputFile === "string"
                 ? vitest.config.outputFile
-                : vitest.config.outputFile?.bmf ?? undefined;
+                : vitest.config.outputFile?.bmf ?? userOptions.outputFile;
+        this.config.prefix = userOptions.prefix ?? "";
         this.vitest = vitest;
     }
     onTestRunEnd(testModules, unhandledErrors, reason) {
@@ -17,7 +21,7 @@ export default class BMFReporter {
         const bmf = {};
         for (const testModule of testModules) {
             for (const testCase of testModule.children.allTests("passed")) {
-                const name = createBenchmarkName(testCase);
+                const name = createBenchmarkName(testCase, this.config.prefix);
                 if (name in bmf) {
                     throw new Error([
                         `Expected "${name}" not to exist as a benchmark name.`,
@@ -40,10 +44,10 @@ export default class BMFReporter {
         }
     }
 }
-function createBenchmarkName(testCase) {
+function createBenchmarkName(testCase, prefix) {
     // todo: add project name
     //@ts-expect-error`
-    return [testCase.task.fullName].filter(Boolean).join(" # ");
+    return [prefix, testCase.task.fullName].filter(Boolean).join(" # ");
 }
 export function createBenchmarkMeasures(testCase) {
     const meta = testCase.meta();

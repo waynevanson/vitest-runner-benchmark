@@ -12,6 +12,9 @@ export interface BenchmarkMetricFormat {
 }
 export interface BMFReporterConfig {
     outputFile: undefined | string;
+    prefix: string;
+}
+export interface BMFReporterUserOptions extends Partial<BMFReporterConfig> {
 }
 export default class BMFReporter implements Reporter {
     config: BMFReporterConfig;

@@ -27,18 +27,27 @@ export interface BenchmarkMetricFormat {
 // todo: add pretty json output
 export interface BMFReporterConfig {
   outputFile: undefined | string
+  prefix: string
 }
+
+export interface BMFReporterUserOptions extends Partial<BMFReporterConfig> {}
 
 // todo: allow template syntax for saving names
 export default class BMFReporter implements Reporter {
-  config: BMFReporterConfig = { outputFile: undefined }
+  config: BMFReporterConfig = { outputFile: undefined, prefix: "" }
   vitest: Vitest | undefined
 
   onInit(vitest: Vitest) {
+    const userOptions: BMFReporterUserOptions =
+      //@ts-expect-error
+      vitest.config.reporters.find((value) => value[0] === "bmf")?.[1] ?? {}
+
     this.config.outputFile =
       typeof vitest.config.outputFile === "string"
         ? vitest.config.outputFile
-        : vitest.config.outputFile?.bmf ?? undefined
+        : vitest.config.outputFile?.bmf ?? userOptions.outputFile
+
+    this.config.prefix = userOptions.prefix ?? ""
 
     this.vitest = vitest
   }
@@ -54,7 +63,7 @@ export default class BMFReporter implements Reporter {
 
     for (const testModule of testModules) {
       for (const testCase of testModule.children.allTests("passed")) {
-        const name = createBenchmarkName(testCase)
+        const name = createBenchmarkName(testCase, this.config.prefix)
 
         if (name in bmf) {
           throw new Error(
@@ -84,10 +93,10 @@ export default class BMFReporter implements Reporter {
   }
 }
 
-function createBenchmarkName(testCase: TestCase): string {
+function createBenchmarkName(testCase: TestCase, prefix: string): string {
   // todo: add project name
   //@ts-expect-error`
-  return [testCase.task.fullName].filter(Boolean).join(" # ")
+  return [prefix, testCase.task.fullName].filter(Boolean).join(" # ")
 }
 
 export function createBenchmarkMeasures(
